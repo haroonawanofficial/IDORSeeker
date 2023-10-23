@@ -148,15 +148,15 @@ class PassiveCrawl:
         if self.deepcrawl:
             self.startDeepCommonCrawl()
         else:
-            self.getCommonCrawlURLs(self.domain, self.want_subdomain, ["http://index.commoncrawl.org/CC-MAIN-2018-22-index"])
+            common_crawl_urls = self.getCommonCrawlURLs(self.domain, self.want_subdomain, ["http://index.commoncrawl.org/CC-MAIN-2018-22-index"])
+            wayback_urls = self.getWaybackURLs(self.domain, self.want_subdomain)
+            otx_urls = self.getOTX_URLs(self.domain)
 
-        urls_list1 = self.getWaybackURLs(self.domain, self.want_subdomain)
-        urls_list2 = self.getOTX_URLs(self.domain)
+            # Combine and remove duplicates from all sources
+            combined_urls = common_crawl_urls + wayback_urls + otx_urls
+            self.final_url_list = list(OrderedDict.fromkeys(combined_urls))
 
-        self.final_url_list.update(urls_list1)
-        self.final_url_list.update(urls_list2)
-
-        return list(self.final_url_list)
+        return self.final_url_list
     
     def getIdealDomain(self, domainName):
         final_domain = domainName.replace("http://", "")
@@ -287,30 +287,25 @@ class IDORScanner:
 
         return self.vulnerable_urls
 
-    def test_idor_vulnerabilities(self, url, parameter):
-        vulnerable_urls = []
-        if self.stop_scan:
-            return vulnerable_urls
+def test_idor_vulnerabilities(url, parameter):
+    vulnerable_urls = []
 
-        for payload in custom_idor_payloads:
-            target_url = f"{url}?{parameter}={payload}"
+    for payload in custom_idor_payloads:
+        target_url = f"{url}?{parameter}={payload}"
+        
+        try:
+            response = requests.head(target_url, verify=False, timeout=10, allow_redirects=False)
+            if response.status_code == 200:
+                if "Unauthorized" in response.text:
+                    # Check if the URL has already been reported
+                    if target_url not in reported_urls:
+                        print(f"IDOR vulnerability found in URL: {url}")
+                        reported_urls.add(target_url)
+                        vulnerable_urls.append(url)
+        except requests.exceptions.RequestException:
+            pass
 
-            try:
-                response = requests.get(target_url, verify=False, timeout=10)
-                if self.stop_scan:
-                    return vulnerable_urls
-
-                if response.status_code == 200:
-                    if "Unauthorized" in response.text:
-                        # Check if the URL has already been reported
-                        if target_url not in self.reported_urls:
-                            print(f"IDOR vulnerability found in URL: {url}")
-                            self.reported_urls.add(target_url)
-                            vulnerable_urls.append(url)
-            except Exception as e:
-                pass
-
-        return vulnerable_urls
+    return vulnerable_urls
 
     def store_vulnerabilities_in_sqlite(self):
         conn = sqlite3.connect("idor_vulnerabilities.db")
@@ -378,7 +373,7 @@ if __name__ == '__main__':
         sys.exit()
 
     print("=========================================================================")
-    print("[>>] [Total URLs] : ", len(final_url_list))
+    print("[>>] [Total URLs Audit] : ", len(final_url_list))
 
     # Initialize the set of processed URLs
     processed_urls = set()
