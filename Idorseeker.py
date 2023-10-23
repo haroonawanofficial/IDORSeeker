@@ -12,6 +12,22 @@ requests.packages.urllib3.disable_warnings()
 
 GREEN, RED, WHITE, YELLOW, MAGENTA, BLUE, END = '\33[94m', '\033[91m', '\33[97m', '\33[93m', '\033[1;35m', '\033[1;32m', '\033[0m'
 
+# Define a set to store processed URLs
+processed_urls = set()
+
+# Function to scan URLs for IDOR vulnerabilities
+def scan_urls_for_idor(url):
+    # Check if the URL has already been processed
+    if url in processed_urls:
+        return []
+
+    # Add the URL to the set of processed URLs
+    processed_urls.add(url)
+
+    # Rest of the code for scanning and testing IDOR vulnerabilities
+    vulnerable_urls = test_idor_vulnerabilities(url, arguments.parameter)
+    return vulnerable_urls
+
 def get_arguments():
         parser = argparse.ArgumentParser(description=f'{RED}Advance IDOR Vulnerability Scanner')
         parser._optionals.title = f"{GREEN}Optional Arguments{YELLOW}"
@@ -363,6 +379,9 @@ if __name__ == '__main__':
 
     print("=========================================================================")
     print("[>>] [Total URLs] : ", len(final_url_list))
+
+    # Initialize the set of processed URLs
+    processed_urls = set()
 
     scan = IDORScanner(final_url_list, arguments.parameter, arguments.thread, arguments.report_file)
     vulnerable_urls = scan.start()
