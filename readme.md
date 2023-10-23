@@ -80,3 +80,6 @@ The IDOR Vulnerability Scanner is designed with code performance in mind to deli
 6. **Open Source Contribution**: Developers and security enthusiasts can contribute to the open-source community by enhancing the tool's functionality and expanding its capabilities.
 
 
+# F.A.Q. What to look in IDOR
+
+1. Anything that refers directly to an internal object, leading to unauthorized access to data or resources, that could be open redirects; passwords and log files; any senitive resources of documents; all of lead to IDOR vulnerability.
