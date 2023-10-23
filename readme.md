@@ -28,6 +28,19 @@
 - **Collaborative Analysis**: SQLite support allows for multi-user access and collaborative analysis.
 - **Time Efficiency**: Multithreading ensures quick assessment of web applications.
 
+## SQLite Support and Benefits
+
+The IDOR Vulnerability Scanner includes built-in SQLite support, offering several advantages for managing and analyzing vulnerability data:
+
+1. **Data Storage**: SQLite is employed to store information about identified IDOR vulnerabilities, ensuring that you have a structured record of the vulnerabilities discovered during scanning.
+
+2. **Efficient Querying**: SQLite's query capabilities enable swift and effective retrieval of vulnerability data. This allows you to filter, search, and analyze the information, making it simpler to prioritize and address potential security issues.
+
+3. **Portability**: SQLite databases are self-contained and stored in a single file. This portability makes it easy to share scan results with team members, back up data, or move the database between different systems.
+
+4. **Multi-User Access**: Multiple team members can simultaneously access the SQLite database, facilitating collaborative analysis, reporting, and real-time sharing of findings.
+
+
 ## Concurrency and Parallel Execution
 
 The IDOR Vulnerability Scanner employs concurrency and parallel execution to optimize its performance, making it a versatile tool for efficient scanning. Key aspects of its concurrent design include:
